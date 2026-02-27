@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useTranslation } from '../../../lib/useTranslation'
+import { useTranslation } from '@/lib/useTranslation'
 import {
   ShieldCheckIcon,
   KeyIcon,
@@ -17,15 +17,37 @@ import {
   EnvelopeIcon
 } from '@heroicons/react/24/outline'
 
+// Define types for security events and sessions
+type SecurityStatus = 'success' | 'failed' | 'warning'
+
+interface SecurityEvent {
+  id: number
+  event: string
+  location: string
+  device: string
+  ip: string
+  status: SecurityStatus
+  time: string
+}
+
+interface ActiveSession {
+  id: number
+  device: string
+  location: string
+  ip: string
+  lastActive: string
+  current: boolean
+}
+
 export default function SecurityPage() {
   const { t } = useTranslation()
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(true)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>(true)
   const [loginAlerts, setLoginAlerts] = useState({
     email: true,
     sms: false
   })
 
-  const securityEvents = [
+  const securityEvents: SecurityEvent[] = [
     { id: 1, event: 'Login Attempt', location: 'Addis Ababa, Ethiopia', device: 'Chrome on Windows', ip: '196.188.123.45', status: 'success', time: '2 minutes ago' },
     { id: 2, event: 'Password Changed', location: 'Bahir Dar, Ethiopia', device: 'Firefox on MacOS', ip: '196.189.67.89', status: 'success', time: '1 hour ago' },
     { id: 3, event: 'Failed Login Attempt', location: 'Unknown', device: 'Safari on iPhone', ip: '45.67.123.89', status: 'failed', time: '3 hours ago' },
@@ -33,12 +55,12 @@ export default function SecurityPage() {
     { id: 5, event: 'Account Settings Changed', location: 'Addis Ababa, Ethiopia', device: 'Edge on Windows', ip: '196.188.78.90', status: 'warning', time: '1 day ago' }
   ]
 
-  const activeSessions = [
+  const activeSessions: ActiveSession[] = [
     { id: 1, device: 'Chrome on Windows', location: 'Addis Ababa, Ethiopia', ip: '196.188.123.45', lastActive: 'Currently active', current: true },
     { id: 2, device: 'Safari on iPhone', location: 'Bahir Dar, Ethiopia', ip: '196.189.67.89', lastActive: '2 hours ago', current: false }
   ]
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: SecurityStatus): string => {
     switch(status) {
       case 'success': return 'text-green-600 bg-green-100'
       case 'failed': return 'text-red-600 bg-red-100'
@@ -47,7 +69,7 @@ export default function SecurityPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: SecurityStatus) => {
     switch(status) {
       case 'success': return CheckCircleIcon
       case 'failed': return XCircleIcon
