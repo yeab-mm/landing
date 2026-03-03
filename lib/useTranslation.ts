@@ -11,9 +11,8 @@ export function useTranslation(): UseTranslationReturn {
   
   const t = (key: string): string => {
     if (!key) return ''
-    // Use type assertion to avoid TypeScript errors
     const trans = translations as any
-    return trans[language]?.[key] || trans.en?.[key] || key
+    return trans[language]?.[key] || trans.en[key] || key
   }
   
   return { t, language }

@@ -1,42 +1,67 @@
+// lib/LanguageContext.tsx
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
-// Define the context type
+type Language = 'en' | 'am'
+
 interface LanguageContextType {
-  language: string
-  changeLanguage: (lang: string) => void
+  language: Language
+  setLanguage: (lang: Language) => void
+  darkMode: boolean
+  setDarkMode: (dark: boolean) => void
 }
 
-// Create context with undefined default value
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-// Provider component
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<string>('en')
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [language, setLanguage] = useState<Language>('en')
+  const [darkMode, setDarkMode] = useState<boolean>(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Load language from localStorage on mount
-    const savedLang = localStorage.getItem('appLanguage')
-    if (savedLang) {
-      setLanguage(savedLang)
+    setMounted(true)
+    // Load saved preferences from localStorage
+    const savedLanguage = localStorage.getItem('language') as Language
+    const savedDarkMode = localStorage.getItem('darkMode')
+    
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'am')) {
+      setLanguage(savedLanguage)
+    }
+    
+    if (savedDarkMode) {
+      setDarkMode(savedDarkMode === 'true')
     }
   }, [])
 
-  const changeLanguage = (lang: string) => {
+  const handleSetLanguage = (lang: Language) => {
+    console.log('Setting language to:', lang) // Debug log
     setLanguage(lang)
-    localStorage.setItem('appLanguage', lang)
+    localStorage.setItem('language', lang)
+  }
+
+  const handleSetDarkMode = (dark: boolean) => {
+    setDarkMode(dark)
+    localStorage.setItem('darkMode', dark.toString())
+  }
+
+  if (!mounted) {
+    return null
   }
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
+    <LanguageContext.Provider value={{ 
+      language, 
+      setLanguage: handleSetLanguage,
+      darkMode, 
+      setDarkMode: handleSetDarkMode 
+    }}>
       {children}
     </LanguageContext.Provider>
   )
 }
 
-// Custom hook to use the language context
-export function useLanguage(): LanguageContextType {
+export function useLanguage() {
   const context = useContext(LanguageContext)
   if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider')
